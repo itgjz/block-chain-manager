@@ -2,23 +2,25 @@ import axios from 'axios'
 import { message } from 'antd'
 import { stringify } from 'qs'
 import urlTemplate from 'url-template'
-
+import { registerUser } from '../services/app'
 
 // message 全局配置
 message.config({
   top: 50,
 })
 
-axios.defaults.baseURL = 'http://47.245.53.108:4000'
-axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8'
-
+axios.defaults.baseURL = 'http://zhehan.tech:4000'
+axios.defaults.headers.post['Content-Type'] = 'application/json'
+axios.defaults.timeout = 30000;
 
 const fetch = (url, options) => {
-  if (options.headers) {
-    axios.defaults.headers.common['Authorization'] = options.headers.authorization
+  const { method = 'get', data } = options
+  let requestOptions = {}
+  if (options && options.requestOptions) {
+    requestOptions = options.requestOptions
   }
 
-  const { method = 'get', data } = options
+
   switch (method.toLowerCase()) {
     case 'get':
       return axios.get(url, { params: data })
@@ -27,9 +29,9 @@ const fetch = (url, options) => {
     case 'head':
       return axios.head(url, data)
     case 'post':
-      return axios.post(url, stringify(data))
+      return axios.post(url, data, requestOptions)
     case 'put':
-      return axios.put(url, stringify(data))
+      return axios.put(url, data)
     case 'patch':
       return axios.patch(url, data)
     default:
@@ -59,6 +61,7 @@ function handelData(res) {
 }
 
 function handleError(error) {
+  console.log(error)
   const data = error.response.data
   if (data.errors) {
     message.error(`${data.message}：${data.errors}`, 5)
@@ -74,8 +77,40 @@ export default function request(url, options) {
   // if (url !== '/oauth/token' && url !== '/admin/check') {
   //   url = `${url}?access_token=${Cookie.get('access_token')}`
   // }
-  let pathUrl = urlTemplate.parse(url).expand(options)
+  let pathUrl = urlTemplate.parse(url).expand(options.data)
 
+  return fetch(pathUrl, options)
+    .then(checkStatus)
+    .then(handelData)
+    .catch(handleError)
+}
+
+export async function securityRequest(url, options) {
+  let userInfoCache = {}
+  let token = ''
+  try {
+    userInfoCache = JSON.parse(window.localStorage.getItem("user_info"))
+  } catch (e) {
+    userInfoCache = {}
+    throw e
+  }
+  const { orgName, username } = userInfoCache
+  if (!orgName) {
+    message.error("请先登录！")
+    return
+  }
+
+  const user = await registerUser({ orgName, username })
+  if (user && user.success) {
+    token = user.token
+  }
+  else {
+    message.error(user.message)
+    return
+  }
+
+  axios.defaults.headers.common['Authorization'] = 'Bearer ' + token
+  let pathUrl = urlTemplate.parse(url).expand(options.data)
   return fetch(pathUrl, options)
     .then(checkStatus)
     .then(handelData)

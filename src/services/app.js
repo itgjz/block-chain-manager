@@ -1,20 +1,21 @@
-import request from '../utils/request';
+import request, { securityRequest } from '../utils/request';
 
 // registerUser
 export async function registerUser(params) {
   return request('/users', {
     method: 'post',
-    data: params
+    data: params,
+    requestOptions: {
+      headers: {
+        "Content-Type": "application/json;charset=utf-8"
+      }
+    }
   });
 }
 
 // Create Channel
-export async function createChannel(params, headersOption) {
-  console.log(headersOption)
-  return request('/channels', {
-    headers: {
-      ...headersOption
-    },
+export async function createChannel(params) {
+  return securityRequest('/channels', {
     method: 'post',
     data: params
   });
@@ -22,7 +23,7 @@ export async function createChannel(params, headersOption) {
 
 // Join Channel
 export async function joinChannel(params) {
-  return request('/channels/{channelName}/peers', {
+  return securityRequest('/channels/{channelName}/peers', {
     method: 'post',
     data: params
   });
@@ -30,7 +31,7 @@ export async function joinChannel(params) {
 
 // Update anchor peers
 export async function updateAnchorPeers(params) {
-  return request('/channels/{channelName}/anchorpeers', {
+  return securityRequest('/channels/{channelName}/anchorpeers', {
     method: 'post',
     data: params
   });
@@ -38,7 +39,7 @@ export async function updateAnchorPeers(params) {
 
 // Install chaincode on target peers
 export async function installChainCode(params) {
-  return request('/chaincodes', {
+  return securityRequest('/chaincodes', {
     method: 'post',
     data: params
   });
@@ -46,7 +47,7 @@ export async function installChainCode(params) {
 
 // Instantiate chaincode on target peers
 export async function instantiateChainCode(params) {
-  return request('/channels/{channelName}/chaincodes', {
+  return securityRequest('/channels/{channelName}/chaincodes', {
     method: 'post',
     data: params
   });
@@ -54,7 +55,7 @@ export async function instantiateChainCode(params) {
 
 // Invoke transaction on chaincode on target peers
 export async function invokeChainCode(params) {
-  return request('/channels/{channelName}/chaincodes/{chaincodeName}', {
+  return securityRequest('/channels/{channelName}/chaincodes/{chaincodeName}', {
     method: 'post',
     data: params
   });

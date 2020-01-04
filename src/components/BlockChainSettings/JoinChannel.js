@@ -2,16 +2,16 @@ import React from 'react';
 import { connect } from 'dva';
 import { Form, Input, Button } from 'antd'
 
-const RegisterUser = props => {
+const JoinChannel = props => {
     const { dispatch, form } = props
     // const { app, loading } = state
     const { getFieldDecorator, getFieldsValue } = form;
 
-    function submitRegisterUser(e) {
+    function submitJoinChannel(e) {
         e.preventDefault()
         const values = getFieldsValue()
         dispatch({
-            type: 'app/submitRegisterUser',
+            type: 'app/submitJoinChannel',
             payload: {
                 data: values
             }
@@ -20,14 +20,14 @@ const RegisterUser = props => {
 
     return (
         <>
-            <Form onSubmit={submitRegisterUser}>
-                <Form.Item label={"用户名称"}>
-                    {getFieldDecorator('username', {})(
+            <Form onSubmit={submitJoinChannel}>
+                <Form.Item label={"通道名称"}>
+                    {getFieldDecorator('channelName', {})(
                         <Input />
                     )}
                 </Form.Item>
-                <Form.Item label={"组织名称"}>
-                    {getFieldDecorator('orgName', {})(
+                <Form.Item label={"加入节点"}>
+                    {getFieldDecorator('peers', {})(
                         <Input />
                     )}
                 </Form.Item>
@@ -40,6 +40,6 @@ const RegisterUser = props => {
     )
 }
 
-const RegisterUserForm = Form.create({})(RegisterUser)
+const JoinChannelForm = Form.create({})(JoinChannel)
 
-export default connect((state) => ({ state }))(RegisterUserForm);
+export default connect((state) => ({ state }))(JoinChannelForm);

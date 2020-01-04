@@ -1,4 +1,4 @@
-import { registerUser, createChannel } from '../services/app'
+import { registerUser, createChannel, joinChannel } from '../services/app'
 import { message } from 'antd'
 
 export default {
@@ -14,7 +14,6 @@ export default {
 
     effects: {
         *submitRegisterUser(action, { put, call, select }) {
-            console.log("---dispath submitRegisterUser")
             const { payload } = action
             const ret = yield call(registerUser, payload.data)
             if (ret && ret.success === false) {
@@ -40,16 +39,47 @@ export default {
         },
 
         *submitCreateChannel(action, { put, call, select }) {
-            console.log("---dispath submitCreateChannel")
             const { payload } = action
+            const ret = yield call(createChannel, payload.data)
 
-            const userInfoCache = JSON.parse(window.localStorage.getItem("user_info"))
+            if (ret && ret.success === false) {
+                if (ret.message) {
+                    message.error(ret.message)
+                }
+                else {
+                    message.error("请求失败")
+                }
+            }
 
-            yield call(registerUser, userInfoCache)
+            if (ret && ret.success) {
+                if (ret.message) {
+                    message.success(ret.message)
+                }
+            }
+        },
 
-            const ret = yield call(createChannel, payload.data, {
-                authorization: `Bearer ${userInfoCache.access_token}`
-            })
+        *submitJoinChannel(action, { put, call, select }) {
+            const { payload } = action
+            const ret = yield call(joinChannel, payload.data)
+            if (ret && ret.success === false) {
+                if (ret.message) {
+                    message.error(ret.message)
+                }
+                else {
+                    message.error("请求失败")
+                }
+            }
+
+            if (ret && ret.success) {
+                if (ret.message) {
+                    message.success(ret.message)
+                }
+            }
+        },
+
+        *submitUpdateAncharPeer(action, { put, call, select }) {
+            const { payload } = action
+            const ret = yield call(joinChannel, payload.data)
             if (ret && ret.success === false) {
                 if (ret.message) {
                     message.error(ret.message)
@@ -65,6 +95,8 @@ export default {
                 }
             }
         }
+
+
     },
 
     subscriptions: {
